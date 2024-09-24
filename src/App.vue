@@ -1,15 +1,15 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <BondCard code="RU000A100VQ6"/>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+
+import BondCard from "@/components/BondCard.vue";
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    BondCard
   }
 }
 </script>
