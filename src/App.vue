@@ -1,15 +1,68 @@
 <template>
-  <BondCard code="RU000A100VQ6"/>
+  <BondCard
+      v-for="bond in bonds"
+      :key="bond.code"
+      :title="bond.title"
+      :code="bond.code"
+      :percent="bond.percent"
+      :ytm="bond.ytm"
+      :price="bond.price"
+  ></BondCard>
+  <h6>Не является индивидуальной инвестиционной рекомендацией</h6>
 </template>
 
 <script>
 
 import BondCard from "@/components/BondCard.vue";
+import axios from "axios";
 
 export default {
   name: 'App',
+  data() {
+    return {
+      bonds: [
+        {
+          title: 'Название облигации',
+          code: 'SU26222RMFS8',
+          percent: 'загрузка',
+          ytm: 'загрузка',
+          price: 'загрузка'
+        },
+      ]
+    }
+  },
   components: {
     BondCard
+  },
+  mounted() {
+    this.fetchDataFromServer(this.bonds[0]);
+  },
+  methods: {
+    async fetchDataFromServer(bond) {
+      try {
+        const xmlStringName = await axios.get('https://iss.moex.com/iss/securities.xml?q=' + bond.code)
+        const parser = new DOMParser();
+        const xmlDocName = parser.parseFromString(xmlStringName.data, "text/xml")
+        const rowsName = xmlDocName.getElementsByTagName('row')
+        bond.title = rowsName[0].getAttribute('shortname')
+
+        const xmlStringPrice = await axios.get('https://iss.moex.com/iss/securities/' + bond.code + '/aggregates.json?date=2024-09-23')
+        let volume = xmlStringPrice.data.aggregates.data[0][5]
+        let value = xmlStringPrice.data.aggregates.data[0][6]
+        if (value !== 0) {
+          bond.price = (volume / value).toFixed(2)
+        }
+
+        const xmlStringYtm = await axios.get('https://iss.moex.com/iss/securities/' + bond.code + '.xml')
+        const xmlDocYtm = parser.parseFromString(xmlStringYtm.data, "text/xml")
+        const rowsYtm = xmlDocYtm.getElementsByTagName('row')
+        bond.ytm = (Number(rowsYtm[14].getAttribute('value')) + Number(rowsYtm[19].getAttribute('value')) - bond.price).toFixed(2)
+
+        bond.percent = (bond.ytm / Number(rowsYtm[12].getAttribute('value'))).toFixed(2)
+      } catch (error) {
+        console.error('Ошибка при получении данных', error);
+      }
+    }
   }
 }
 </script>
