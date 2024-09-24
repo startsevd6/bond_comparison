@@ -46,7 +46,22 @@ export default {
         const rowsName = xmlDocName.getElementsByTagName('row')
         bond.title = rowsName[0].getAttribute('shortname')
 
-        const xmlStringPrice = await axios.get('https://iss.moex.com/iss/securities/' + bond.code + '/aggregates.json?date=2024-09-23')
+        let TODAY_DATE = new Date
+        let day = TODAY_DATE.getDay().toString()
+        if (day === '1') {
+          TODAY_DATE = new Date(Date.now()-(86400000*3))
+        } else if (day === '7') {
+          TODAY_DATE = new Date(Date.now()-(86400000*2))
+        }
+        console.log(TODAY_DATE)
+        let year = TODAY_DATE.getFullYear().toString()
+        let month = (TODAY_DATE.getMonth()+1).toString()
+        day = TODAY_DATE.getDay().toString()
+        let date = TODAY_DATE.getDate().toString()
+        console.log(year, month, day, date)
+        console.log('https://iss.moex.com/iss/securities/' + bond.code + '/aggregates.json?date=' + year + '-' + month + '-' + date)
+        const xmlStringPrice = await axios.get('https://iss.moex.com/iss/securities/' + bond.code + '/aggregates.json?date=' + year + '-' + month + '-' + date)
+        console.log(xmlStringPrice)
         let volume = xmlStringPrice.data.aggregates.data[0][5]
         let value = xmlStringPrice.data.aggregates.data[0][6]
         if (value !== 0) {
