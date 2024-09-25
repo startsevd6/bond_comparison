@@ -57,7 +57,7 @@ export default {
         let year = TODAY_DATE.getFullYear().toString()
         let month = (TODAY_DATE.getMonth()+1).toString()
         day = TODAY_DATE.getDay().toString()
-        let date = TODAY_DATE.getDate().toString()
+        let date = (TODAY_DATE.getDate()-1).toString()
         console.log(year, month, day, date)
         console.log('https://iss.moex.com/iss/securities/' + bond.code + '/aggregates.json?date=' + year + '-' + month + '-' + date)
         const xmlStringPrice = await axios.get('https://iss.moex.com/iss/securities/' + bond.code + '/aggregates.json?date=' + year + '-' + month + '-' + date)
@@ -65,15 +65,14 @@ export default {
         let volume = xmlStringPrice.data.aggregates.data[0][5]
         let value = xmlStringPrice.data.aggregates.data[0][6]
         if (value !== 0) {
-          bond.price = (volume / value).toFixed(2)
+          bond.price = Number((volume / value).toFixed(2))
         }
 
         const xmlStringYtm = await axios.get('https://iss.moex.com/iss/securities/' + bond.code + '.xml')
         const xmlDocYtm = parser.parseFromString(xmlStringYtm.data, "text/xml")
         const rowsYtm = xmlDocYtm.getElementsByTagName('row')
-        bond.ytm = (Number(rowsYtm[14].getAttribute('value')) + Number(rowsYtm[19].getAttribute('value')) - bond.price).toFixed(2)
-
-        bond.percent = (bond.ytm / Number(rowsYtm[12].getAttribute('value'))).toFixed(2)
+        bond.ytm = Number(Number((Number(rowsYtm[14].getAttribute('value')) + Number(rowsYtm[19].getAttribute('value')) - bond.price)).toFixed(2))
+        bond.percent = Number((Number(bond.ytm / Number(rowsYtm[12].getAttribute('value')))).toFixed(2))
       } catch (error) {
         console.error('Ошибка при получении данных', error);
       }
