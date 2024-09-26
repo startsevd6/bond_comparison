@@ -71,8 +71,8 @@ export default {
         const xmlStringYtm = await axios.get('https://iss.moex.com/iss/securities/' + bond.code + '.xml')
         const xmlDocYtm = parser.parseFromString(xmlStringYtm.data, "text/xml")
         const rowsYtm = xmlDocYtm.getElementsByTagName('row')
-        bond.ytm = Number(Number((Number(rowsYtm[14].getAttribute('value')) + Number(rowsYtm[19].getAttribute('value')) - bond.price)).toFixed(2))
-        bond.percent = Number((Number(bond.ytm / Number(rowsYtm[12].getAttribute('value')))).toFixed(2))
+        bond.ytm = Number(Number((Number(rowsYtm[15].getAttribute('value')) + Number(rowsYtm[20].getAttribute('value')) - bond.price)).toFixed(2))
+        bond.percent = Number((Number(bond.ytm / Number(rowsYtm[13].getAttribute('value')))).toFixed(2))
       } catch (error) {
         console.error('Ошибка при получении данных', error);
       }
