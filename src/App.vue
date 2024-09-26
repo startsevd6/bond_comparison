@@ -1,4 +1,6 @@
 <template>
+  <CommissionSettings @commission-saved="updateCommission"></CommissionSettings>
+
   <BondCard
       v-for="bond in bonds"
       :key="bond.code"
@@ -14,6 +16,7 @@
 <script>
 
 import BondCard from "@/components/BondCard.vue";
+import CommissionSettings from "@/components/CommissionSettings.vue";
 import axios from "axios";
 
 export default {
@@ -28,16 +31,22 @@ export default {
           ytm: 'загрузка',
           price: 'загрузка'
         },
-      ]
+      ],
+      commission: ""
     }
   },
   components: {
+    CommissionSettings,
     BondCard
   },
   mounted() {
     this.fetchDataFromServer(this.bonds[0]);
   },
   methods: {
+    updateCommission(value) {
+      this.commission = value;
+      this.fetchDataFromServer(this.bonds[0])
+    },
     async fetchDataFromServer(bond) {
       try {
         const xmlStringName = await axios.get('https://iss.moex.com/iss/securities.xml?q=' + bond.code)
@@ -64,8 +73,10 @@ export default {
         console.log(xmlStringPrice)
         let volume = xmlStringPrice.data.aggregates.data[0][5]
         let value = xmlStringPrice.data.aggregates.data[0][6]
+
+        let commission = this.commission
         if (value !== 0) {
-          bond.price = Number((volume / value).toFixed(2))
+          bond.price = Number((volume / value * (1+(commission/100))).toFixed(2))
         }
 
         const xmlStringYtm = await axios.get('https://iss.moex.com/iss/securities/' + bond.code + '.xml')
