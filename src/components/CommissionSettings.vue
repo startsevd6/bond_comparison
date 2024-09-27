@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <span>Комиссия: </span>
-    <input type="text" v-model="commission" placeholder="Введите значение" />
+    <input type="text" v-model="commission" @input="validateCommission" placeholder="Введите значение" />
     <span>%</span>
     <button @click="getCommission">Сохранить</button>
   </div>
@@ -15,7 +15,13 @@ export default {
     }
   },
   methods: {
-    getCommission(){
+    validateCommission() {
+      if (this.commission.includes(",")) {
+        alert("Нельзя писать запятые, используйте точки")
+        this.commission = this.commission.replace(",", "")
+      }
+    },
+    getCommission() {
       this.$emit('commission-saved', this.commission)
     }
   }
